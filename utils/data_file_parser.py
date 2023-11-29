@@ -1,7 +1,5 @@
-import re
-
-
 class DataFileParser:
+
     @staticmethod
     def parse_likelihood_file(path: str):
         with open(f"{path}.txt", "r") as file:
