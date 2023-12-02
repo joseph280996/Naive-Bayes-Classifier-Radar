@@ -10,7 +10,7 @@ class NaiveBayesClassifier:
         transition_probs: float,
         enable_addition_feature: bool,
     ):
-        self.__likelihood: dict[str, list[float]] = dict()
+        self.__likelihood: dict[str, list[list[float]]] = dict()
         self.__initial_probs: float = initial_probs
         self.__transition_probs: float = transition_probs
         self.__classes: list[str] = []
@@ -22,23 +22,29 @@ class NaiveBayesClassifier:
                 if clazz not in self.__classes:
                     self.__classes.append(clazz)
 
-                self.__likelihood[clazz] = priors[i]
+                self.__likelihood[clazz].append(priors[i])
         else:
             classes_historical_records = defaultdict(list)
             for i, clazz in enumerate(expected_outcome):
                 if clazz not in self.__classes:
                     self.__classes.append(clazz)
 
-                classes_historical_records[clazz] = (
-                    classes_historical_records[clazz] + priors[i]
-                )
+                classes_historical_records[clazz].append(priors[i])
 
             for clazz in classes_historical_records:
-                class_historical_records = classes_historical_records[clazz]
-                self.__likelihood[clazz] = [
-                    mean(class_historical_records),
-                    variance(class_historical_records),
-                ]
+                class_historical_records: list[
+                    list[float]
+                ] = classes_historical_records[clazz]
+                for record in class_historical_records:
+                    if clazz not in self.__likelihood:
+                        self.__likelihood[clazz] = list()
+
+                    self.__likelihood[clazz].append(
+                        [
+                            mean(record),
+                            variance(record),
+                        ]
+                    )
         return self
 
     def predict(self, measurements: list[list[float]]):
@@ -64,14 +70,23 @@ class NaiveBayesClassifier:
 
     def __likelihood_func(self, clazz: str, measurement: float) -> float:
         if not self.__enable_addition_feature:
-            return self.__likelihood[clazz][
+            return self.__likelihood[clazz][0][
                 self.__calculate_likelihood_index(measurement)
             ]
 
-        mean, variance = self.__likelihood[clazz]
-        return (1 / (math.sqrt(2 * math.pi * variance)) * math.exp(
-            -((measurement - mean) ** 2 / (2 * variance))
-        ))
+        features_means_variances = self.__likelihood[clazz]
+        likelihood = 0
+        for mean, variance in features_means_variances:
+            new_likelihood = (
+                1
+                / (math.sqrt(2 * math.pi * variance))
+                * math.exp(-((measurement - mean) ** 2 / (2 * variance)))
+            )
+
+            if new_likelihood > likelihood:
+                likelihood = new_likelihood
+
+        return likelihood
 
     def __calculate_current_probability(
         self, measurement: float, t: int, historical_probs: dict[str, list[float]]

@@ -58,7 +58,8 @@ if __name__ == "__main__":
         for i, result in enumerate(predictions):
             print(f"Object {i + 1}: {result}")
     else:
-        classifier.fit(training, ["Bird"] * 10 + ["Plane"] * 10)
+        labeling = ["Bird"] * 10 + ["Plane"] * 10
+        classifier.fit(training, labeling)
         predictions = classifier.predict(inputs)
         for i, result in enumerate(predictions):
             print(f"Object {i + 1}: {result}")
