@@ -1,10 +1,20 @@
 import math
-from collections import defaultdict
 
 
 class DataFileParser:
+    """
+    This is the file parsing class which handles parsing the input files.
+    """
+
     @staticmethod
     def parse_likelihood_file(path: str) -> list[list[float]]:
+        """
+        This function handle parsing the likelihood file.
+        Arguments:
+            path: the path to the file
+        Returns:
+            list of all the lines in the file
+        """
         with open(f"{path}.txt", "r") as file:
             lines = file.readlines()
             res = []
@@ -15,6 +25,15 @@ class DataFileParser:
 
     @staticmethod
     def parse_input_file(path: str) -> list[list[float]]:
+        """
+        This function handle parsing the input file.
+        It will replace all the NaN values with the mean of the rest of the values that is not NaN.
+
+        Arguments:
+            path: the path to the file
+        Returns:
+            list of all the lines in the file
+        """
         with open(f"{path}.txt", "r") as file:
             lines = file.readlines()
             res = []
@@ -29,7 +48,14 @@ class DataFileParser:
             return res
 
     @staticmethod
-    def parse_trainning_file(path: str, distribution_rate: float = 0.5) -> list[list[float]]:
+    def parse_trainning_file(path: str) -> list[list[float]]:
+        """
+        This function handle parsing the training file.
+        Arguments:
+            path: the path to the file
+        Returns:
+            list of all the lines in the file
+        """
         training_content = DataFileParser.parse_input_file(path)
         return training_content
 
